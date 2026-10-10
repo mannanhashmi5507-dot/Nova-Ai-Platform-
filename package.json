@@ -1,0 +1,36 @@
+{
+  "name": "nova-ai-platform",
+  "version": "2.0.0",
+  "description": "Nova AI is a modular AI platform combining intelligent chat, coding assistance, image generation, and automation. Powered by Victus.",
+  "main": "src/index.js",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "victus:cloud-memory-node": "node scripts/victus-cloud-memory-node.js",
+    "victus:internet-node": "node scripts/victus-internet-node.js",
+    "victus:uacl-worker": "node scripts/uacl-worker.js"
+  },
+  "dependencies": {
+    "@node-saml/passport-saml": "^5.0.0",
+    "adm-zip": "^0.5.16",
+    "connect-pg-simple": "^9.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "mammoth": "^1.8.0",
+    "multer": "^2.0.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.13.1",
+    "stripe": "^17.5.0",
+    "xlsx": "^0.18.5"
+  }
+}
