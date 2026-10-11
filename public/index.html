@@ -522,7 +522,7 @@
 
   /* Badges, toasts, progress, usage */
   .badge, .pill, .provider-tag{animation:pop .35s var(--ease-spring) backwards;}
-  .toast{animation:toast-in .36s var(--ease-spring) both;}
+  .toast{animation:toast-in .36s var(--ease-spring) backwards; transition:opacity .3s ease, transform .3s ease;}
   .usage-fill{transform-origin:left center; animation:bar-grow .8s var(--ease-out) backwards;}
   .progress-fill{background-size:200% 100%;}
   .spinner{animation-duration:.7s;}
@@ -546,6 +546,43 @@
     animation:shimmer 1.6s linear infinite;
   }
 
+
+  /* ───── Extra details: suggestions, scroll button, hints ───── */
+  .suggest-row{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:14px; max-width:560px;}
+  .suggest-chip{
+    display:inline-flex; align-items:center; gap:7px; padding:0 14px; min-height:36px; border-radius:20px; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); color:var(--text-1); font-size:var(--fs-sm); font-family:inherit; font-weight:500;
+    transition:background var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out), box-shadow var(--dur) ease;
+    animation:card-in var(--dur-slow) var(--ease-out) backwards;
+  }
+  .suggest-chip:nth-child(1){animation-delay:.25s;} .suggest-chip:nth-child(2){animation-delay:.31s;}
+  .suggest-chip:nth-child(3){animation-delay:.37s;} .suggest-chip:nth-child(4){animation-delay:.43s;}
+  .suggest-chip:hover{border-color:var(--primary); color:var(--text-0); background:var(--primary-soft); transform:translateY(-2px); box-shadow:0 8px 20px rgba(79,141,247,.18);}
+  .suggest-chip:active{transform:scale(.97);}
+  .suggest-chip .icon{color:#9CC0FF;}
+  .empty-hint{font-size:var(--fs-xs); color:var(--text-2); margin-top:10px;}
+  @media (hover:none){ .empty-hint{display:none;} }
+  .empty-hint kbd, .kbd{font-family:var(--mono); font-size:11px; padding:1px 6px; border-radius:5px; background:var(--card); border:1px solid var(--border); color:var(--text-1);}
+
+  .input-area{position:relative;}
+  .input-area > .scroll-bottom-btn{
+    position:absolute; right:28px; top:-52px; margin:0; max-width:none; width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-0);
+    background:var(--card); border:1px solid var(--border-strong); box-shadow:var(--shadow-md);
+    opacity:0; transform:translateY(8px) scale(.9); pointer-events:none;
+    transition:opacity var(--dur) ease, transform var(--dur) var(--ease-spring), background var(--dur-fast) ease;
+  }
+  .input-area > .scroll-bottom-btn.show{opacity:1; transform:none; pointer-events:auto;}
+  .input-area > .scroll-bottom-btn:hover{background:var(--card-hover);}
+  .char-count.warn{color:var(--warning);}
+  .msg-time-sep{max-width:var(--chat-w);}
+  .toast.info{border-left-color:var(--primary);}
+  .conn-banner{
+    display:none; align-items:center; justify-content:center; gap:8px; padding:8px 16px; font-size:var(--fs-sm);
+    background:rgba(245,165,36,.12); color:#FCD34D; border-bottom:1px solid rgba(245,165,36,.28); flex-shrink:0;
+  }
+  .conn-banner.show{display:flex; animation:page-in var(--dur) var(--ease-out) backwards;}
+  @media (max-width:880px){ .input-area > .scroll-bottom-btn{right:16px;} }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms !important; animation-delay:0s !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
     .btn:hover,.card:hover,.suite-card:hover,.nav-btn:hover,.send-btn:hover{transform:none !important;}
@@ -568,6 +605,7 @@
   <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12"/><polyline points="7,11 12,16 17,11"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></symbol>
   <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></symbol>
   <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
   <symbol id="i-google" viewBox="0 0 24 24"><path d="M21.8 12.2c0-.7-.06-1.4-.18-2H12v3.9h5.5a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 3-4.4 3-7.6z"/><path d="M12 21c2.7 0 4.96-.9 6.6-2.4l-3.3-2.6c-.9.6-2 1-3.3 1a5.8 5.8 0 0 1-5.5-3.9H3.1v2.7A9.5 9.5 0 0 0 12 21z"/><path d="M6.5 13.1a5.7 5.7 0 0 1 0-3.6V6.8H3.1a9.5 9.5 0 0 0 0 8.6l3.4-2.3z"/><path d="M12 5.4c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.4 9.4 0 0 0 12 1.9 9.5 9.5 0 0 0 3.1 6.8l3.4 2.3A5.8 5.8 0 0 1 12 5.4z"/></symbol>
@@ -673,6 +711,7 @@
 
   <!-- ───────── MAIN ───────── -->
   <main class="main">
+    <div class="conn-banner" id="connBanner" role="status"><svg class="icon" width="14" height="14"><use href="#i-alert"/></svg> You appear to be offline — messages will fail until the connection is back.</div>
     <div class="topbar">
       <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar"><svg class="icon" width="19" height="19"><use href="#i-menu"/></svg></button>
       <div class="logo-text" style="font-size:15px;">Nova AI</div>
@@ -698,10 +737,18 @@
           <div class="logo-mark">N</div>
           <div style="font-size:15px; color:var(--text-0); font-weight:600;">Start a conversation</div>
           <div style="font-size:13px;">Ask Nova AI anything — coding help, writing, analysis, and more.</div>
+          <div class="suggest-row" id="suggestRow" role="group" aria-label="Suggested prompts">
+            <button type="button" class="suggest-chip" data-prompt="Explain how neural networks learn, in simple terms."><svg class="icon" width="14" height="14"><use href="#i-brain"/></svg> Explain an idea</button>
+            <button type="button" class="suggest-chip" data-prompt="Write a Python function that removes duplicates from a list while keeping the order."><svg class="icon" width="14" height="14"><use href="#i-code"/></svg> Write code</button>
+            <button type="button" class="suggest-chip" data-prompt="Draft a short, friendly email asking a client for feedback on our proposal."><svg class="icon" width="14" height="14"><use href="#i-edit"/></svg> Draft an email</button>
+            <button type="button" class="suggest-chip" data-prompt="Give me a 5-step plan to learn a new skill in 30 days."><svg class="icon" width="14" height="14"><use href="#i-calendar"/></svg> Make a plan</button>
+          </div>
+          <div class="empty-hint"><span class="kbd">Enter</span> send · <span class="kbd">Shift</span>+<span class="kbd">Enter</span> new line · <span class="kbd">/</span> focus box</div>
         </div>
       </div>
 
       <div class="input-area">
+        <button type="button" class="scroll-bottom-btn" id="scrollBottomBtn" aria-label="Scroll to latest message" title="Scroll to latest"><svg class="icon" width="16" height="16"><use href="#i-arrow-down"/></svg></button>
         <div class="input-row">
           <label for="chatInput" class="visually-hidden">Message Nova AI</label>
           <textarea id="chatInput" rows="1" placeholder="Message Nova AI…" title="Enter to send · Shift+Enter for a new line" maxlength="12000"></textarea>
@@ -1052,12 +1099,21 @@
     toast.style.display = 'flex';
     toast.style.alignItems = 'center';
     toast.querySelector('span').textContent = message;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.style.cursor = 'pointer';
+    toast.title = 'Click to dismiss';
     container.appendChild(toast);
-    setTimeout(() => {
+    // keep at most 4 toasts on screen so a burst of errors can't cover the page
+    while(container.children.length > 4) container.firstElementChild.remove();
+    let gone = false;
+    const dismiss = () => {
+      if(gone) return; gone = true;
       toast.style.opacity = '0';
-      toast.style.transition = 'opacity .3s';
-      setTimeout(() => toast.remove(), 300);
-    }, 4200);
+      toast.style.transform = 'translateX(24px)';
+      setTimeout(() => toast.remove(), 320);
+    };
+    toast.addEventListener('click', dismiss);
+    setTimeout(dismiss, 4200);
   }
 
   function setButtonLoading(btn, loading, loadingText){
@@ -1077,8 +1133,11 @@
   navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.page;
-      navButtons.forEach(b => b.classList.toggle('active', b === btn));
+      navButtons.forEach(b => { const on = b === btn; b.classList.toggle('active', on); if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
       pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
+      const label = (btn.textContent || '').trim();
+      document.title = (label && target !== 'chat') ? 'Nova AI · ' + label : 'Nova AI';
+      store.set('nova_last_page', target);
       closeSidebarMobile();
       if(target === 'status') loadHealth();
       if(target === 'models') renderModelsPage();
@@ -1094,6 +1153,16 @@
     overlay.classList.add('show');
   });
   overlay.addEventListener('click', closeSidebarMobile);
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebarMobile();
+    // "/" jumps to the chat box (like many chat apps) unless the user is already typing somewhere
+    if(e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey){
+      const t = e.target, tag = t && t.tagName;
+      if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+      const chatPage = document.getElementById('page-chat');
+      if(chatPage && chatPage.classList.contains('active')){ e.preventDefault(); document.getElementById('chatInput').focus(); }
+    }
+  });
   function closeSidebarMobile(){
     sidebar.classList.remove('open');
     overlay.classList.remove('show');
@@ -1771,6 +1840,7 @@
     const len = chatInput.value.length;
     charCount.textContent = len + ' / 12000';
     charCount.classList.toggle('over', len > 12000);
+    charCount.classList.toggle('warn', len > 10800 && len <= 12000);
     try{ store.set('nova_draft', chatInput.value); }catch(e){ /* storage unavailable */ }
   });
 
@@ -1923,6 +1993,11 @@
       scrollToBottom();
 
       if(providerLabel){
+        const picked = (state.models.find(m => m.id === state.selectedModel) || {}).name || '';
+        const pickedBase = picked.split('·')[0].trim().toLowerCase();
+        if(state.selectedModel !== 'auto' && pickedBase && !providerLabel.toLowerCase().includes(pickedBase) && !pickedBase.includes(providerLabel.toLowerCase())){
+          showToast(picked.split('·')[0].trim() + ' was unavailable, so ' + providerLabel + ' answered instead.', 'warning');
+        }
         const pill = document.getElementById('chatProviderPill');
         pill.textContent = providerLabel;
         pill.style.display = 'inline-block';
@@ -1948,6 +2023,14 @@
       } else {
         console.error('Chat error:', err);
         showToast(err.message || 'Nova AI is temporarily busy. Please try again.', 'error');
+        // The request failed with no reply: take the unanswered message back out of the history and
+        // restore it to the input box, so retrying doesn't leave a duplicate or orphaned bubble.
+        if(!assistantText && state.history.length && state.history[state.history.length - 1] === userMsg){
+          state.history.pop();
+          if(!persistenceAvailable()) persistHistory();
+          renderHistory();
+          if(!chatInput.value){ chatInput.value = text; chatInput.dispatchEvent(new Event('input')); }
+        }
       }
     }finally{
       clearTimeout(idleTimer);
@@ -2390,6 +2473,33 @@
     }catch(e){ /* storage unavailable */ }
   }
 
+  /* Suggestion chips on the empty chat: fill the box (don't auto-send) so people can edit first */
+  document.getElementById('suggestRow').addEventListener('click', (e) => {
+    const chip = e.target.closest('.suggest-chip'); if(!chip) return;
+    chatInput.value = chip.dataset.prompt || '';
+    chatInput.dispatchEvent(new Event('input'));
+    chatInput.focus();
+  });
+
+  /* "Jump to latest" button: appears when the reader has scrolled up */
+  (function(){
+    const conv = document.getElementById('conversation');
+    const btn = document.getElementById('scrollBottomBtn');
+    const update = () => btn.classList.toggle('show', conv.scrollHeight - conv.scrollTop - conv.clientHeight > 240);
+    conv.addEventListener('scroll', update, { passive: true });
+    new MutationObserver(update).observe(conv, { childList: true, subtree: true, characterData: true });
+    btn.addEventListener('click', () => conv.scrollTo({ top: conv.scrollHeight, behavior: 'smooth' }));
+  })();
+
+  /* Offline banner */
+  (function(){
+    const banner = document.getElementById('connBanner');
+    const sync = () => banner.classList.toggle('show', navigator.onLine === false);
+    window.addEventListener('online', () => { sync(); showToast('Back online', 'success'); });
+    window.addEventListener('offline', sync);
+    sync();
+  })();
+
   async function init(){
     restoreDraft();
     loadModels();
@@ -2409,6 +2519,15 @@
       loadStoredHistory();
       renderHistory();
     }
+
+    // Return to the page the user was last on (chat is the default)
+    try{
+      const last = store.get('nova_last_page');
+      if(last && last !== 'chat'){
+        const b = document.querySelector('.nav-btn[data-page="' + last.replace(/[^\w-]/g,'') + '"]');
+        if(b) b.click();
+      }
+    }catch(e){ /* ignore */ }
   }
 
   init();
