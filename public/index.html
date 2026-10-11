@@ -422,8 +422,133 @@
     /* 16px inputs stop iOS Safari from zooming the page on focus */
     textarea,select,input[type="text"],input[type="email"],input[type="url"],input[type="search"],input[type="number"],input[type="datetime-local"],input[type="date"],input:not([type]),.conv-search-input{font-size:16px;}
   }
+  /* ═══════════════════════════════════════════════════════════════
+     Motion layer — all animations are transform/opacity only (GPU
+     friendly) and use fill-mode "backwards" so nothing is left in a
+     transformed state afterwards. Fully disabled for users who prefer
+     reduced motion (see the media query at the very end).
+     ═══════════════════════════════════════════════════════════════ */
+  :root{
+    --ease-out:cubic-bezier(.22,.8,.26,1);
+    --ease-spring:cubic-bezier(.34,1.45,.5,1);
+    --dur-fast:.15s; --dur:.3s; --dur-slow:.5s;
+  }
+  @keyframes page-in{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  @keyframes card-in{from{opacity:0; transform:translateY(14px) scale(.985);} to{opacity:1; transform:none;}}
+  @keyframes msg-in-user{from{opacity:0; transform:translateX(16px) scale(.96);} to{opacity:1; transform:none;}}
+  @keyframes msg-in-bot{from{opacity:0; transform:translateX(-16px) scale(.96);} to{opacity:1; transform:none;}}
+  @keyframes fade-in{from{opacity:0;} to{opacity:1;}}
+  @keyframes float{0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);}}
+  @keyframes glow{0%,100%{box-shadow:0 4px 14px rgba(79,141,247,.30);} 50%{box-shadow:0 6px 26px rgba(139,92,246,.55);}}
+  @keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(34,192,138,.55);} 70%{box-shadow:0 0 0 7px rgba(34,192,138,0);} 100%{box-shadow:0 0 0 0 rgba(34,192,138,0);}}
+  @keyframes pulse-dot-down{0%{box-shadow:0 0 0 0 rgba(240,85,90,.55);} 70%{box-shadow:0 0 0 7px rgba(240,85,90,0);} 100%{box-shadow:0 0 0 0 rgba(240,85,90,0);}}
+  @keyframes gradient-pan{0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;}}
+  @keyframes shimmer{0%{background-position:-200% 0;} 100%{background-position:200% 0;}}
+  @keyframes slide-in-left{from{opacity:0; transform:translateX(-10px);} to{opacity:1; transform:none;}}
+  @keyframes pop{0%{transform:scale(.9); opacity:0;} 60%{transform:scale(1.04);} 100%{transform:scale(1); opacity:1;}}
+  @keyframes toast-in{from{opacity:0; transform:translateX(34px) scale(.96);} to{opacity:1; transform:none;}}
+  @keyframes bar-grow{from{transform:scaleX(0);} to{transform:scaleX(1);}}
+
+  /* Page + sub-tab transitions */
+  .page.active{animation:page-in var(--dur) var(--ease-out) backwards;}
+  .suite-subpage.active{animation:page-in var(--dur) var(--ease-out) backwards;}
+
+  /* Staggered card entrances (first 12 children, then they appear together) */
+  .grid > *, .suite-grid > *, .mini-stat-grid > *, .feature-layout > *, .result-list > *{
+    animation:card-in var(--dur-slow) var(--ease-out) backwards;
+  }
+  .grid > *:nth-child(1), .suite-grid > *:nth-child(1), .mini-stat-grid > *:nth-child(1), .feature-layout > *:nth-child(1){animation-delay:.03s;}
+  .grid > *:nth-child(2), .suite-grid > *:nth-child(2), .mini-stat-grid > *:nth-child(2), .feature-layout > *:nth-child(2){animation-delay:.08s;}
+  .grid > *:nth-child(3), .suite-grid > *:nth-child(3), .mini-stat-grid > *:nth-child(3){animation-delay:.13s;}
+  .grid > *:nth-child(4), .suite-grid > *:nth-child(4), .mini-stat-grid > *:nth-child(4){animation-delay:.18s;}
+  .grid > *:nth-child(5), .suite-grid > *:nth-child(5){animation-delay:.23s;}
+  .grid > *:nth-child(6), .suite-grid > *:nth-child(6){animation-delay:.28s;}
+  .grid > *:nth-child(7), .suite-grid > *:nth-child(7){animation-delay:.33s;}
+  .grid > *:nth-child(8), .suite-grid > *:nth-child(8){animation-delay:.38s;}
+  .grid > *:nth-child(n+9), .suite-grid > *:nth-child(n+9){animation-delay:.42s;}
+  .suite-hero, .panel, .status-page-top, .image-result > *{animation:card-in var(--dur-slow) var(--ease-out) backwards;}
+
+  /* Hero: slowly drifting gradient */
+  .suite-hero{background-size:220% 220%; animation:card-in var(--dur-slow) var(--ease-out) backwards, gradient-pan 14s ease-in-out infinite;}
+
+  /* Chat */
+  .msg-row.user{animation:msg-in-user .32s var(--ease-out) backwards;}
+  .msg-row.assistant{animation:msg-in-bot .32s var(--ease-out) backwards;}
+  .empty-state > *{animation:card-in var(--dur-slow) var(--ease-out) backwards;}
+  .empty-state > *:nth-child(2){animation-delay:.08s;} .empty-state > *:nth-child(3){animation-delay:.16s;}
+  .empty-state .logo-mark{animation:pop .6s var(--ease-spring) backwards, float 4.5s ease-in-out .8s infinite, glow 3.5s ease-in-out .8s infinite;}
+  .typing-indicator span{animation-name:bounce;}
+  .bubble{transition:box-shadow var(--dur) ease;}
+  .msg-row.assistant .bubble:hover{box-shadow:0 6px 22px rgba(0,0,0,.28);}
+  .msg-actions, .msg-meta .icon-btn{transition:opacity var(--dur-fast) ease, background var(--dur-fast) ease, color var(--dur-fast) ease;}
+
+  /* Sidebar + navigation */
+  .sidebar-header .logo-mark{animation:glow 4s ease-in-out infinite;}
+  .nav-btn{transition:background var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out), box-shadow var(--dur) ease;}
+  .nav-btn:hover{transform:translateX(3px);}
+  .nav-btn .icon{transition:transform var(--dur) var(--ease-spring);}
+  .nav-btn:hover .icon{transform:scale(1.15);}
+  .nav-btn.active{animation:slide-in-left .3s var(--ease-out) backwards;}
+  .nav-btn.active .icon{transform:scale(1.08);}
+  .overlay.show{animation:fade-in .22s ease both;}
+  .status-dot{animation:pulse-dot 2.2s ease-out infinite;}
+  .status-dot.down{animation-name:pulse-dot-down;}
+  .conv-item{transition:background var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out); animation:slide-in-left .28s var(--ease-out) backwards;}
+  .conv-item:hover{transform:translateX(2px);}
+
+  /* Buttons & controls */
+  .btn, .send-btn, .size-opt, .suite-tab, .icon-btn, .hamburger, .code-copy-btn, .pill-button{
+    transition:background var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease,
+               box-shadow var(--dur) ease, transform var(--dur-fast) var(--ease-out);
+  }
+  .btn:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.28);}
+  .btn:active:not(:disabled){transform:translateY(0) scale(.97);}
+  .btn-primary:hover:not(:disabled){box-shadow:0 8px 22px rgba(79,141,247,.4);}
+  .btn-ghost:hover:not(:disabled), .btn-danger-outline:hover:not(:disabled){box-shadow:none;}
+  .send-btn:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 8px 22px rgba(79,141,247,.45);}
+  .send-btn:hover:not(:disabled) .icon{transform:translateX(2px);}
+  .send-btn .icon{transition:transform var(--dur-fast) var(--ease-out);}
+  .size-opt:hover, .suite-tab:hover{transform:translateY(-1px);}
+  .size-opt.active, .suite-tab.active{animation:pop .3s var(--ease-spring);}
+  .icon-btn:active, .code-copy-btn:active{transform:scale(.92);}
+
+  /* Cards: lift on hover */
+  .card, .suite-card, .feature-panel, .mini-stat, .result-item{transition:border-color var(--dur) ease, transform var(--dur) var(--ease-out), box-shadow var(--dur) ease, background var(--dur) ease;}
+  .card:hover, .suite-card:hover{transform:translateY(-3px); box-shadow:0 12px 28px rgba(0,0,0,.35);}
+  .mini-stat:hover, .result-item:hover{transform:translateY(-2px);}
+  .suite-card:hover .suite-card-icon{transform:scale(1.1) rotate(-4deg);}
+  .suite-card-icon{transition:transform var(--dur) var(--ease-spring);}
+  .tier-card.current{animation:card-in var(--dur-slow) var(--ease-out) backwards, glow 4s ease-in-out infinite;}
+
+  /* Badges, toasts, progress, usage */
+  .badge, .pill, .provider-tag{animation:pop .35s var(--ease-spring) backwards;}
+  .toast{animation:toast-in .36s var(--ease-spring) both;}
+  .usage-fill{transform-origin:left center; animation:bar-grow .8s var(--ease-out) backwards;}
+  .progress-fill{background-size:200% 100%;}
+  .spinner{animation-duration:.7s;}
+
+  /* Inputs: soft focus lift */
+  textarea, select, input[type="text"], input[type="email"], input[type="url"], input[type="search"], input[type="number"], input[type="datetime-local"], input[type="date"], input:not([type]), .conv-search-input{
+    transition:border-color var(--dur-fast) ease, box-shadow var(--dur) ease, background var(--dur-fast) ease;
+  }
+  textarea:focus, select:focus, input:focus{background:#1D2740;}
+  .dropzone{transition:border-color var(--dur) ease, background var(--dur) ease, transform var(--dur) var(--ease-out);}
+  .dropzone:hover{transform:scale(1.01);}
+
+  /* Result output reveals */
+  .suite-output.show{animation:page-in var(--dur) var(--ease-out) backwards;}
+  .image-result img{animation:pop .5s var(--ease-spring) backwards;}
+
+  /* Skeleton shimmer for "Loading…" placeholders (any .card-desc that is the only child of a grid/panel while loading) */
+  .grid > .card-desc:only-child, .panel > .card-desc:only-child, .suite-page > .card-desc:only-child{
+    display:block; padding:14px 16px; border-radius:var(--radius); color:var(--text-2);
+    background:linear-gradient(90deg,var(--card) 25%,var(--card-hover) 50%,var(--card) 75%); background-size:200% 100%;
+    animation:shimmer 1.6s linear infinite;
+  }
+
   @media (prefers-reduced-motion:reduce){
-    *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
+    *,*::before,*::after{animation-duration:.01ms !important; animation-delay:0s !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
+    .btn:hover,.card:hover,.suite-card:hover,.nav-btn:hover,.send-btn:hover{transform:none !important;}
   }
 </style>
 </head>
@@ -579,7 +704,7 @@
       <div class="input-area">
         <div class="input-row">
           <label for="chatInput" class="visually-hidden">Message Nova AI</label>
-          <textarea id="chatInput" rows="1" placeholder="Message Nova AI… (Enter to send, Shift+Enter for new line)" maxlength="12000"></textarea>
+          <textarea id="chatInput" rows="1" placeholder="Message Nova AI…" title="Enter to send · Shift+Enter for a new line" maxlength="12000"></textarea>
           <button class="send-btn" id="sendBtn" aria-label="Send message"><svg class="icon" width="17" height="17"><use href="#i-send"/></svg></button>
         </div>
         <div class="input-footer">
@@ -790,6 +915,17 @@
 <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
 
 <script>
+  /* Safe storage: localStorage can throw (private mode, blocked site data, some in-app browsers).
+     Falling back to memory keeps the app working instead of crashing at startup. */
+  const store = (function(){
+    const mem = {};
+    return {
+      get(k){ try{ return localStorage.getItem(k); }catch(e){ return Object.prototype.hasOwnProperty.call(mem,k) ? mem[k] : null; } },
+      set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k] = String(v); } },
+      remove(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+    };
+  })();
+
 (function(){
   'use strict';
 
@@ -800,7 +936,7 @@
     selectedModel: 'auto',
     user: null,                // {loggedIn, user, billing?}
     tiers: [],                 // from /api/billing/tiers
-    guestToken: localStorage.getItem('nova_guest_token') || null,
+    guestToken: store.get('nova_guest_token') || null,
     isStreaming: false,
     conversationId: null,      // active conversation, when persistence is available
     conversations: [],         // cached list from /api/conversations
@@ -839,7 +975,7 @@
     const SENTINEL = '\u0000CODEBLOCK';
 
     text = text.replace(/```([\s\S]*?)```/g, function(_, code){
-      const cleaned = code.replace(/^\n/, '').replace(/\n$/, '');
+      const cleaned = code.replace(/^[ \t]*[\w+#.\-]{0,20}[ \t]*\n/, '').replace(/\n$/, ''); // drop the optional language label (```js) so it isn't shown as code
       codeBlocks.push(
         '<div class="code-block-wrap">' +
           '<button class="code-copy-btn" type="button" title="Copy code"><svg class="icon" width="12" height="12"><use href="#i-copy"/></svg> Copy</button>' +
@@ -984,7 +1120,7 @@
 
     if(state.user && state.user.loggedIn && state.user.user){
       if(state.guestToken){
-        localStorage.removeItem('nova_guest_token');
+        store.remove('nova_guest_token');
         state.guestToken = null;
       }
       const u = state.user.user;
@@ -1011,7 +1147,7 @@
         '</div>' +
         '<button class="btn btn-block btn-sm btn-danger-outline" style="margin-top:10px;" id="logoutGuestBtn"><svg class="icon" width="14" height="14"><use href="#i-log-out"/></svg> End Guest Session</button>';
       document.getElementById('logoutGuestBtn').addEventListener('click', () => {
-        localStorage.removeItem('nova_guest_token');
+        store.remove('nova_guest_token');
         state.guestToken = null;
         renderUserSection();
         showToast('Guest session ended', 'info');
@@ -1038,7 +1174,7 @@
       const data = await res.json();
       if(data && data.success){
         state.guestToken = data.token;
-        localStorage.setItem('nova_guest_token', data.token);
+        store.set('nova_guest_token', data.token);
         renderUserSection();
         showToast('Signed in as Guest', 'success');
       } else {
@@ -1096,7 +1232,7 @@
         select.appendChild(opt);
       });
       select.disabled = false;
-      const saved = localStorage.getItem('nova_selected_model');
+      const saved = store.get('nova_selected_model');
       if(saved && state.models.some(m => m.id === saved && m.available)){
         select.value = saved;
       }
@@ -1124,7 +1260,7 @@
 
   document.getElementById('modelSelect').addEventListener('change', (e) => {
     state.selectedModel = e.target.value;
-    localStorage.setItem('nova_selected_model', state.selectedModel);
+    store.set('nova_selected_model', state.selectedModel);
     updateModelDesc();
     updateChatModelPill();
   });
@@ -1555,7 +1691,7 @@
   /* ─────────────────────────── Chat persistence ─────────────────────────── */
   function loadStoredHistory(){
     try{
-      const raw = localStorage.getItem('nova_chat_history');
+      const raw = store.get('nova_chat_history');
       if(raw){
         state.history = JSON.parse(raw).slice(-MAX_STORED_MESSAGES);
       }
@@ -1564,7 +1700,7 @@
 
   function persistHistory(){
     try{
-      localStorage.setItem('nova_chat_history', JSON.stringify(state.history.slice(-MAX_STORED_MESSAGES)));
+      store.set('nova_chat_history', JSON.stringify(state.history.slice(-MAX_STORED_MESSAGES)));
     }catch(err){ /* storage full or unavailable */ }
   }
 
@@ -1635,7 +1771,7 @@
     const len = chatInput.value.length;
     charCount.textContent = len + ' / 12000';
     charCount.classList.toggle('over', len > 12000);
-    try{ localStorage.setItem('nova_draft', chatInput.value); }catch(e){ /* storage unavailable */ }
+    try{ store.set('nova_draft', chatInput.value); }catch(e){ /* storage unavailable */ }
   });
 
   chatInput.addEventListener('keydown', (e) => {
@@ -1688,7 +1824,7 @@
     chatInput.style.height = 'auto';
     charCount.textContent = '0 / 12000';
     charCount.classList.remove('over');
-    try{ localStorage.removeItem('nova_draft'); }catch(e){ /* ignore */ }
+    try{ store.remove('nova_draft'); }catch(e){ /* ignore */ }
     scrollToBottom();
 
     // Typing indicator
@@ -1714,7 +1850,7 @@
 
     const controller = new AbortController();
     activeChatController = controller;
-    let idleTimer = setTimeout(() => controller.abort(), 30000);
+    let idleTimer = setTimeout(() => controller.abort(), 75000); // first byte: server finishes the full reply (and any provider fallback) before streaming
     const resetIdleTimer = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => controller.abort(), 30000); };
 
     try{
@@ -2246,7 +2382,7 @@
 
   function restoreDraft(){
     try{
-      const draft = localStorage.getItem('nova_draft');
+      const draft = store.get('nova_draft');
       if(draft){
         chatInput.value = draft;
         chatInput.dispatchEvent(new Event('input'));
