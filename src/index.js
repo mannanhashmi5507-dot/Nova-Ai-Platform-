@@ -910,18 +910,29 @@ const AI_PROVIDERS = [
     name:      'ChatGPT',
     available: () => !!ENV.OPENAI_KEY,
     call:      async (messages, signal) => {
-      const res = await fetchWithTimeout(
+      // GPT-5-family models reject `max_tokens` and any non-default `temperature`
+      // (HTTP 400 "Unsupported parameter"), which made every ChatGPT request fail and
+      // silently fall back to another provider. `max_completion_tokens` is accepted by
+      // current and older chat models, and omitting temperature uses the model default.
+      const primary  = (process.env.OPENAI_MODEL || 'gpt-5.4-mini').trim();
+      const fallback = 'gpt-4o-mini'; // widely available; used once if the primary model name is rejected
+      const attempt = (model) => fetchWithTimeout(
         'https://api.openai.com/v1/chat/completions',
         {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ENV.OPENAI_KEY}` },
-          body: JSON.stringify({ model: 'gpt-5.4-mini', messages, max_tokens: 2048, temperature: 0.7 }),
+          body: JSON.stringify({ model, messages, max_completion_tokens: 2048 }),
           signal
         },
         20000
       );
+      let res = await attempt(primary);
+      if ((res.status === 400 || res.status === 404) && primary !== fallback) {
+        logger.warn('provider.model_rejected', { provider: 'ChatGPT', model: primary, status: res.status, retryingWith: fallback });
+        res = await attempt(fallback);
+      }
       if (res.status === 429) throw new RateLimitError('ChatGPT');
-      if (!res.ok) throw new Error(`ChatGPT ${res.status}: ${(await res.text()).slice(0, 100)}`);
+      if (!res.ok) throw new Error(`ChatGPT ${res.status}: ${(await res.text()).slice(0, 160)}`);
       const data = await safeJson(res);
       const text = data?.choices?.[0]?.message?.content;
       if (!text) throw new Error('ChatGPT returned empty response');
