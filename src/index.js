@@ -506,6 +506,27 @@ app.get('/logout', (req, res) => {
 });
 
 // ─── Health ────────────────────────────────────────────────
+// ─── Provider diagnostics ────────────────────────────────────
+// Visit /api/providers/diagnose to see WHY Groq / ChatGPT / Gemini fall back.
+// Sends one tiny "Hi" to each configured provider and reports ok or the error.
+// Keys are never printed (any key-like text is redacted).
+app.get('/api/providers/diagnose', chatLimiter, async (req, res) => {
+  const redact = t => String(t).replace(/(gsk_|sk-ant-|sk-|xai-|AIzaSy)[A-Za-z0-9_\-]{6,}/g, '$1***');
+  const targets = AI_PROVIDERS.filter(p => ['Groq', 'ChatGPT', 'Gemini', 'Claude', 'Grok', 'DeepSeek'].includes(p.name));
+  const out = await Promise.all(targets.map(async p => {
+    if (!p.available()) return { provider: p.name, status: 'no key set' };
+    const t0 = Date.now();
+    try {
+      const ctrl = new AbortController();
+      const text = await p.call([{ role: 'user', content: 'Reply with the single word: ok' }], ctrl.signal);
+      return { provider: p.name, status: 'OK', ms: Date.now() - t0, sample: String(text).slice(0, 40) };
+    } catch (e) {
+      return { provider: p.name, status: 'FAILED', ms: Date.now() - t0, error: redact(e.message) };
+    }
+  }));
+  res.json({ checked: out, model: { groq: process.env.GROQ_MODEL || 'llama-3.1-8b-instant', openai: process.env.OPENAI_MODEL || 'gpt-5.4-mini' } });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status:    'healthy',
@@ -536,7 +557,7 @@ app.get('/api/models', (req, res) => {
       { id: 'auto',         name: 'Auto',              description: 'Fastest reliable answer — tries providers in order',          available: true },
       { id: 'victor',       name: 'Victor',            description: 'Multi-agent: routes → drafts → validates → refines',           available: true },
       { id: 'groq',         name: 'Groq · Llama 3.3',  description: 'Fast and high quality',                                        available: !!ENV.GROQ_KEY },
-      { id: 'gemini',       name: 'Gemini 2.0',        description: "Google's flash model",                                         available: !!ENV.GEMINI_KEY },
+      { id: 'gemini',       name: 'Gemini',            description: "Google's flash model",                                         available: !!ENV.GEMINI_KEY },
       { id: 'chatgpt',      name: 'ChatGPT · GPT-5.4 mini', description: "OpenAI's fast, cost-efficient model",                      available: !!ENV.OPENAI_KEY },
       { id: 'claude',       name: 'Claude · Sonnet 4.6', description: "Anthropic's model, strong at reasoning and writing",         available: !!ENV.ANTHROPIC_KEY },
       { id: 'grok',         name: 'Grok 4',             description: "xAI's model",                                                  available: !!ENV.GROK_KEY },
@@ -875,7 +896,7 @@ const AI_PROVIDERS = [
         20000
       );
       if (res.status === 429) throw new RateLimitError('Groq');
-      if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 100)}`);
+      if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 300)}`);
       const data = await safeJson(res);
       // FIX (Bug #4): optional chaining — Groq can return empty choices on edge cases
       const text = data?.choices?.[0]?.message?.content;
@@ -893,11 +914,18 @@ const AI_PROVIDERS = [
       fixedTurns.push({ role: 'user', parts: [{ text: lastMsg.content }] });
       const body = { contents: fixedTurns, generationConfig: { maxOutputTokens: 2048, temperature: 0.7 } };
       if (systemMsg.trim()) body.system_instruction = { parts: [{ text: systemMsg }] };
-      const res = await fetchWithTimeout(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${ENV.GEMINI_KEY}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal },
+      const primary  = (process.env.GEMINI_MODEL || 'gemini-3.6-flash').trim();
+      const fallback = 'gemini-3.5-flash-lite';
+      const attempt = (model) => fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': ENV.GEMINI_KEY }, body: JSON.stringify(body), signal },
         20000
       );
+      let res = await attempt(primary);
+      if (res.status === 404 && primary !== fallback) {
+        logger.warn('provider.model_rejected', { provider: 'Gemini', model: primary, status: res.status, retryingWith: fallback });
+        res = await attempt(fallback);
+      }
       if (res.status === 429) throw new RateLimitError('Gemini');
       if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 100)}`);
       const data = await safeJson(res);
@@ -932,7 +960,7 @@ const AI_PROVIDERS = [
         res = await attempt(fallback);
       }
       if (res.status === 429) throw new RateLimitError('ChatGPT');
-      if (!res.ok) throw new Error(`ChatGPT ${res.status}: ${(await res.text()).slice(0, 160)}`);
+      if (!res.ok) throw new Error(`ChatGPT ${res.status}: ${(await res.text()).slice(0, 300)}`);
       const data = await safeJson(res);
       const text = data?.choices?.[0]?.message?.content;
       if (!text) throw new Error('ChatGPT returned empty response');
