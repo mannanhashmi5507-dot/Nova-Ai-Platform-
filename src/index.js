@@ -512,7 +512,7 @@ app.get('/logout', (req, res) => {
 // Keys are never printed (any key-like text is redacted).
 app.get('/api/providers/diagnose', chatLimiter, async (req, res) => {
   const redact = t => String(t).replace(/(gsk_|sk-ant-|sk-|xai-|AIzaSy)[A-Za-z0-9_\-]{6,}/g, '$1***');
-  const targets = AI_PROVIDERS.filter(p => ['Groq', 'ChatGPT', 'Gemini', 'Claude', 'Grok', 'DeepSeek'].includes(p.name));
+  const targets = AI_PROVIDERS.filter(p => ['Victus', 'Groq', 'ChatGPT', 'Gemini', 'Claude', 'Grok', 'DeepSeek'].includes(p.name));
   const out = await Promise.all(targets.map(async p => {
     if (!p.available()) return { provider: p.name, status: 'no key set' };
     const t0 = Date.now();
@@ -556,6 +556,7 @@ app.get('/api/models', (req, res) => {
     models: [
       { id: 'auto',         name: 'Auto',              description: 'Fastest reliable answer — tries providers in order',          available: true },
       { id: 'victor',       name: 'Victor',            description: 'Multi-agent: routes → drafts → validates → refines',           available: true },
+      { id: 'victus',       name: 'Victus',            description: 'Nova\'s own fine-tuned model',                                 available: !!ENV.VICTUS_MODEL_URL },
       { id: 'groq',         name: 'Groq · Llama 3.3',  description: 'Fast and high quality',                                        available: !!ENV.GROQ_KEY },
       { id: 'gemini',       name: 'Gemini',            description: "Google's flash model",                                         available: !!ENV.GEMINI_KEY },
       { id: 'chatgpt',      name: 'ChatGPT · GPT-5.4 mini', description: "OpenAI's fast, cost-efficient model",                      available: !!ENV.OPENAI_KEY },
