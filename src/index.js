@@ -524,7 +524,7 @@ app.get('/api/providers/diagnose', chatLimiter, async (req, res) => {
       return { provider: p.name, status: 'FAILED', ms: Date.now() - t0, error: redact(e.message) };
     }
   }));
-  res.json({ checked: out, model: { groq: process.env.GROQ_MODEL || 'llama-3.1-8b-instant', openai: process.env.OPENAI_MODEL || 'gpt-5.4-mini' } });
+  res.json({ checked: out, model: { groq: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile', openai: process.env.OPENAI_MODEL || 'gpt-5.4-mini' } });
 });
 
 app.get('/api/health', (req, res) => {
@@ -890,7 +890,7 @@ const AI_PROVIDERS = [
         {
           method:  'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ENV.GROQ_KEY}` },
-          body: JSON.stringify({ model: (process.env.GROQ_MODEL || 'llama-3.1-8b-instant').trim(), messages, max_tokens: 2048, temperature: 0.7 }),
+          body: JSON.stringify({ model: (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile').trim(), messages, max_tokens: 2048, temperature: 0.7 }),
           signal
         },
         20000
